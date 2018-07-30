@@ -6,7 +6,7 @@ import time
 
 import tensorflow as tf
 
-from tfrecord_utils import _process_image_withoutcoder, _convert_to_example_simple
+from prepare_data.tfrecord_utils import _process_image_withoutcoder, _convert_to_example_simple
 
 
 def _add_to_tfrecord(filename, image_example, tfrecord_writer):
@@ -56,7 +56,7 @@ def run(dataset_dir, net, output_dir, name='MTCNN', shuffling=False):
         random.shuffle(dataset)
     # Process dataset files.
     # write the data to tfrecord
-    print 'lala'
+    print('lala')
     with tf.python_io.TFRecordWriter(tf_filename) as tfrecord_writer:
         for i, image_example in enumerate(dataset):
             sys.stdout.write('\r>> Converting image %d/%d' % (i + 1, len(dataset)))
@@ -73,7 +73,7 @@ def get_dataset(dir, net='PNet'):
     #item = 'imglists/PNet/train_%s_raw.txt' % net
     #item = 'imglists/PNet/train_%s_landmark.txt' % net
     item = '%s/landmark_%s_aug.txt' % (net,net)
-    print item 
+    print(item)
     dataset_dir = os.path.join(dir, item)
     imagelist = open(dataset_dir, 'r')
 

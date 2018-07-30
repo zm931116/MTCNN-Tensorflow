@@ -1,16 +1,18 @@
 #coding:utf-8
-import tensorflow as tf
-import numpy as np
 import os
-from datetime import datetime
 import sys
+from datetime import datetime
+
+import numpy as np
+import tensorflow as tf
+
+from train_models.MTCNN_config import config
+
 sys.path.append("../prepare_data")
-print sys.path
-from read_tfrecord_v2 import read_multi_tfrecords,read_single_tfrecord
-from MTCNN_config import config
-from mtcnn_model import P_Net
+print(sys.path)
+from prepare_data.read_tfrecord_v2 import read_multi_tfrecords,read_single_tfrecord
+
 import random
-import numpy.random as npr
 import cv2
 def train_model(base_lr, loss, data_num):
     """
@@ -94,17 +96,17 @@ def train(net_factory, prefix, end_epoch, base_dir,
     #label file
     label_file = os.path.join(base_dir,'train_%s_landmark.txt' % net)
     #label_file = os.path.join(base_dir,'landmark_12_few.txt')
-    print label_file 
+    print(label_file)
     f = open(label_file, 'r')
     num = len(f.readlines())
     print("Total datasets is: ", num)
-    print prefix
+    print(prefix)
 
     #PNet use this method to get data
     if net == 'PNet':
         #dataset_dir = os.path.join(base_dir,'train_%s_ALL.tfrecord_shuffle' % net)
         dataset_dir = os.path.join(base_dir,'train_%s_landmark.tfrecord_shuffle' % net)
-        print dataset_dir
+        print(dataset_dir)
         image_batch, label_batch, bbox_batch,landmark_batch = read_single_tfrecord(dataset_dir, config.BATCH_SIZE, net)
         
     #RNet use 3 tfrecords to get data    

@@ -5,8 +5,8 @@ import math
 from os.path import join, exists
 import cv2
 import numpy as np
-from BBox_utils import getDataFromTxt,processImage,shuffle_in_unison_scary,BBox
-from Landmark_utils import show_landmark,rotate,flip
+from prepare_data.BBox_utils import getDataFromTxt,processImage,shuffle_in_unison_scary,BBox
+from prepare_data.Landmark_utils import show_landmark,rotate,flip
 import random
 import tensorflow as tf
 import sys
@@ -53,7 +53,7 @@ def GenerateData(ftxt, output,net,argument=False):
     elif net == "ONet":
         size = 48
     else:
-        print 'Net type error'
+        print('Net type error')
         return
     image_id = 0
     f = open(join(OUTPUT,"landmark_%s_aug.txt" %(size)),'w')
@@ -82,7 +82,7 @@ def GenerateData(ftxt, output,net,argument=False):
         if argument:
             idx = idx + 1
             if idx % 100 == 0:
-                print idx, "images done"
+                print(idx, "images done")
             x1, y1, x2, y2 = gt_box
             #gt's width
             gt_w = x2 - x1 + 1
@@ -159,7 +159,7 @@ def GenerateData(ftxt, output,net,argument=False):
             #print F_imgs.shape
             #print F_landmarks.shape
             for i in range(len(F_imgs)):
-                print image_id
+                print(image_id)
 
                 if np.sum(np.where(F_landmarks[i] <= 0, 1, 0)) > 0:
                     continue

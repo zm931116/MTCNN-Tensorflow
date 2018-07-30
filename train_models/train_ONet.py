@@ -1,6 +1,6 @@
 #coding:utf-8
-from mtcnn_model import O_Net
-from train import train
+from train_models.mtcnn_model import O_Net
+from train_models.train import train
 
 
 def train_ONet(base_dir, prefix, end_epoch, display, lr):
