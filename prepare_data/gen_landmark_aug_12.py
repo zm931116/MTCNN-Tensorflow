@@ -10,15 +10,15 @@ import numpy.random as npr
 from prepare_data.BBox_utils import getDataFromTxt, BBox
 from prepare_data.Landmark_utils import rotate, flip
 
-dstdir = "12/train_PNet_landmark_aug"
-OUTPUT = '12'
+dstdir = "../../DATA/12/train_PNet_landmark_aug"
+OUTPUT = '../../DATA/12'
 if not exists(OUTPUT): os.mkdir(OUTPUT)
 if not exists(dstdir): os.mkdir(dstdir)
 assert(exists(dstdir) and exists(OUTPUT))
 
 def IoU(box, boxes):
     """Compute IoU between detect box and gt boxes
-
+    gt means ground truth
     Parameters:
     ----------
     box: numpy array , shape (5, ): x1, y1, x2, y2, score
@@ -44,6 +44,16 @@ def IoU(box, boxes):
     ovr = inter*1.0 / (box_area + area - inter)
     return ovr
 def GenerateData(ftxt, output,net,argument=False):
+    '''
+
+    :param ftxt: name/path of the text file that contains image path,
+                bounding box, and landmarks
+
+    :param output: path of the output dir
+    :param net: one of the net in the cascaded networks
+    :param argument: apply augmentation or not
+    :return:  images and related landmarks
+    '''
     if net == "PNet":
         size = 12
     elif net == "RNet":
@@ -54,9 +64,10 @@ def GenerateData(ftxt, output,net,argument=False):
         print('Net type error')
         return
     image_id = 0
+    #
     f = open(join(OUTPUT,"landmark_%s_aug.txt" %(size)),'w')
     #dstdir = "train_landmark_few"
-   
+    # get image path , bounding box, and landmarks from file 'ftxt'
     data = getDataFromTxt(ftxt)
     idx = 0
     #image_path bbox landmark(5*2)
@@ -68,12 +79,19 @@ def GenerateData(ftxt, output,net,argument=False):
         assert(img is not None)
         img_h,img_w,img_c = img.shape
         gt_box = np.array([bbox.left,bbox.top,bbox.right,bbox.bottom])
+        #get sub-image from bbox
         f_face = img[bbox.top:bbox.bottom+1,bbox.left:bbox.right+1]
+        # resize the gt image to specified size
         f_face = cv2.resize(f_face,(size,size))
+        #initialize the landmark
         landmark = np.zeros((5, 2))
-        #normalize
+
+        #normalize land mark by dividing the width and height of the bounding box
+        # landmakrGt is a list of tuples
         for index, one in enumerate(landmarkGt):
+            # (( x - bbox.left)/ (bbx.right - bbox.left), (y - bbox.top)/ (bbox.bottom - bbox.top)
             rv = ((one[0]-gt_box[0])/(gt_box[2]-gt_box[0]), (one[1]-gt_box[1])/(gt_box[3]-gt_box[1]))
+            # put the normalized value into the new list landmark
             landmark[index] = rv
         
         F_imgs.append(f_face)
@@ -95,14 +113,16 @@ def GenerateData(ftxt, output,net,argument=False):
                 bbox_size = npr.randint(int(min(gt_w, gt_h) * 0.8), np.ceil(1.25 * max(gt_w, gt_h)))
                 delta_x = npr.randint(-gt_w * 0.2, gt_w * 0.2)
                 delta_y = npr.randint(-gt_h * 0.2, gt_h * 0.2)
-                nx1 = max(x1+gt_w/2-bbox_size/2+delta_x,0)
-                ny1 = max(y1+gt_h/2-bbox_size/2+delta_y,0)
-                
+                nx1 = int(max(x1+gt_w/2-bbox_size/2+delta_x,0))
+                ny1 = int(max(y1+gt_h/2-bbox_size/2+delta_y,0))
+
                 nx2 = nx1 + bbox_size
                 ny2 = ny1 + bbox_size
                 if nx2 > img_w or ny2 > img_h:
                     continue
                 crop_box = np.array([nx1,ny1,nx2,ny2])
+
+
                 cropped_im = img[ny1:ny2+1,nx1:nx2+1,:]
                 resized_im = cv2.resize(cropped_im, (size, size))
                 #cal iou
@@ -141,7 +161,7 @@ def GenerateData(ftxt, output,net,argument=False):
                         F_imgs.append(face_flipped)
                         F_landmarks.append(landmark_flipped.reshape(10))                
                     
-                    #inverse clockwise rotation
+                    #anti-clockwise rotation
                     if random.choice([0,1]) > 0: 
                         face_rotated_by_alpha, landmark_rotated = rotate(img, bbox, \
                                                                          bbox.reprojectLandmark(landmark_), -5)#顺时针旋转
@@ -159,7 +179,9 @@ def GenerateData(ftxt, output,net,argument=False):
             #print F_imgs.shape
             #print F_landmarks.shape
             for i in range(len(F_imgs)):
-                print(image_id)
+                if image_id % 100 == 0:
+
+                    print('image id : ', image_id)
 
                 if np.sum(np.where(F_landmarks[i] <= 0, 1, 0)) > 0:
                     continue

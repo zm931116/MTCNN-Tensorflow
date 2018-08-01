@@ -85,8 +85,8 @@ def train(net_factory, prefix, end_epoch, base_dir,
     """
     train PNet/RNet/ONet
     :param net_factory:
-    :param prefix:
-    :param end_epoch:16
+    :param prefix: model path
+    :param end_epoch:
     :param dataset:
     :param display:
     :param base_lr:
@@ -98,8 +98,9 @@ def train(net_factory, prefix, end_epoch, base_dir,
     #label_file = os.path.join(base_dir,'landmark_12_few.txt')
     print(label_file)
     f = open(label_file, 'r')
+    # get number of training examples
     num = len(f.readlines())
-    print("Total datasets is: ", num)
+    print("Total size of the dataset is: ", num)
     print(prefix)
 
     #PNet use this method to get data

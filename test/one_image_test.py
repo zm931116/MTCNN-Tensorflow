@@ -51,7 +51,7 @@ test_data = TestLoader(gt_imdb)
 all_boxes,landmarks = mtcnn_detector.detect_face(test_data)
 count = 0
 for imagepath in gt_imdb:
-    print imagepath
+    print(imagepath)
     image = cv2.imread(imagepath)
     for bbox in all_boxes[count]:
         cv2.putText(image,str(np.round(bbox[4],2)),(int(bbox[0]),int(bbox[1])),cv2.FONT_HERSHEY_TRIPLEX,1,color=(255,0,255))

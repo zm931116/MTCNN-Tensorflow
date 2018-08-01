@@ -1,20 +1,22 @@
 #coding:utf-8
 import sys
 #sys.path.append("../")
+from prepare_data.utils import convert_to_square
+
 sys.path.insert(0,'..')
 import numpy as np
 import argparse
 import os
-import cPickle as pickle
+import pickle as pickle
 import cv2
-from train_models.mtcnn_model import P_Net,R_Net
+from train_models.mtcnn_model import P_Net, R_Net, O_Net
 from train_models.MTCNN_config import config
-from loader import TestLoader
+from prepare_data.loader import TestLoader
 from Detection.detector import Detector
 from Detection.fcn_detector import FcnDetector
 from Detection.MtcnnDetector import MtcnnDetector
 from utils import *
-from data_utils import *
+from prepare_data.data_utils import *
 #net : 24(RNet)/48(ONet)
 #data: dict()
 def save_hard_example(net, data,save_path):
@@ -41,8 +43,8 @@ def save_hard_example(net, data,save_path):
     #read detect result
     det_boxes = pickle.load(open(os.path.join(save_path, 'detections.pkl'), 'rb'))
     # print(len(det_boxes), num_of_images)
-    print len(det_boxes)
-    print num_of_images
+    print(len(det_boxes))
+    print(num_of_images)
     assert len(det_boxes) == num_of_images, "incorrect detections or ground truths"
 
     # index of neg, pos and part face, used as their image names
@@ -172,7 +174,7 @@ def t_net(prefix, epoch,
         save_net = "ONet"
     #save detect result
     save_path = os.path.join(data_dir, save_net)
-    print save_path
+    print(save_path)
     if not os.path.exists(save_path):
         os.mkdir(save_path)
 
@@ -202,23 +204,23 @@ def parse_args():
     parser.add_argument('--stride', dest='stride', help='stride of sliding window',
                         default=2, type=int)
     parser.add_argument('--sw', dest='slide_window', help='use sliding window in pnet', action='store_true')
-    # parser.add_argument('--gpu', dest='gpu_id', help='GPU device to train with',
-    #                     default=0, type=int)
+    parser.add_argument('--gpu', dest='gpu_id', help='GPU device to train with',
+                         default=0, type=int)
     parser.add_argument('--shuffle', dest='shuffle', help='shuffle data on visualization', action='store_true')
-    # parser.add_argument('--vis', dest='vis', help='turn on visualization', action='store_true')
+    parser.add_argument('--vis', dest='vis', help='turn on visualization', action='store_true')
     args = parser.parse_args()
     return args
 
 
 if __name__ == '__main__':
 
-    net = 'ONet'
+    net = 'RNet'
     if net == "RNet":
         image_size = 24
     if net == "ONet":
         image_size = 48
 
-    base_dir = '../prepare_data/WIDER_train'
+    base_dir = '../../DATA/WIDER_train'
     data_dir = '%s' % str(image_size)
     
     neg_dir = get_path(data_dir, 'negative')
@@ -231,8 +233,8 @@ if __name__ == '__main__':
 
     args = parse_args()
 
-    print 'Called with argument:'
-    print args 
+    print('Called with argument:')
+    print(args)
     t_net(args.prefix,#model param's file
           args.epoch, #final epoches
           args.batch_size, #test batch_size 
@@ -242,4 +244,4 @@ if __name__ == '__main__':
           args.stride,#stride
           args.slide_window, 
           args.shuffle, 
-          vis=False)
+          vis=True)

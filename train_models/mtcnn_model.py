@@ -229,7 +229,7 @@ def O_Net(inputs,label=None,bbox_target=None,landmark_target=None,training=True)
         print(net.get_shape())
         fc_flatten = slim.flatten(net)
         print(fc_flatten.get_shape())
-        fc1 = slim.fully_connected(fc_flatten, num_outputs=256,scope="fc1", activation_fn=prelu)
+        fc1 = slim.fully_connected(fc_flatten, num_outputs=256,scope="fc1")
         print(fc1.get_shape())
         #batch*2
         cls_prob = slim.fully_connected(fc1,num_outputs=2,scope="cls_fc",activation_fn=tf.nn.softmax)
@@ -250,7 +250,3 @@ def O_Net(inputs,label=None,bbox_target=None,landmark_target=None,training=True)
             return cls_loss,bbox_loss,landmark_loss,L2_loss,accuracy
         else:
             return cls_prob,bbox_pred,landmark_pred
-            
-        
-        
-                                                                  
