@@ -22,24 +22,33 @@ def dense_to_one_hot(labels_dense,num_classes):
 def cls_ohem(cls_prob, label):
     zeros = tf.zeros_like(label)
     #label=-1 --> label=0net_factory
+
+    #pos -> 1, neg -> 0, others -> 0
     label_filter_invalid = tf.where(tf.less(label,0), zeros, label)
     num_cls_prob = tf.size(cls_prob)
     cls_prob_reshape = tf.reshape(cls_prob,[num_cls_prob,-1])
     label_int = tf.cast(label_filter_invalid,tf.int32)
+    # get the number of rows of class_prob
     num_row = tf.to_int32(cls_prob.get_shape()[0])
+    #row = [0,2,4.....]
     row = tf.range(num_row)*2
     indices_ = row + label_int
     label_prob = tf.squeeze(tf.gather(cls_prob_reshape, indices_))
     loss = -tf.log(label_prob+1e-10)
     zeros = tf.zeros_like(label_prob, dtype=tf.float32)
     ones = tf.ones_like(label_prob,dtype=tf.float32)
+    # set pos and neg to be 1, rest to be 0
     valid_inds = tf.where(label < zeros,zeros,ones)
+    # get the number of part and landmark examples
     num_valid = tf.reduce_sum(valid_inds)
+
     keep_num = tf.cast(num_valid*num_keep_radio,dtype=tf.int32)
     #set 0 to invalid sample
     loss = loss * valid_inds
     loss,_ = tf.nn.top_k(loss, k=keep_num)
     return tf.reduce_mean(loss)
+
+
 def bbox_ohem_smooth_L1_loss(bbox_pred,bbox_target,label):
     sigma = tf.constant(1.0)
     threshold = 1.0/(sigma**2)
@@ -183,7 +192,7 @@ def R_Net(inputs,label=None,bbox_target=None,landmark_target=None,training=True)
         print(net.get_shape())
         fc_flatten = slim.flatten(net)
         print(fc_flatten.get_shape())
-        fc1 = slim.fully_connected(fc_flatten, num_outputs=128,scope="fc1", activation_fn=prelu)
+        fc1 = slim.fully_connected(fc_flatten, num_outputs=128,scope="fc1")
         print(fc1.get_shape())
         #batch*2
         cls_prob = slim.fully_connected(fc1,num_outputs=2,scope="cls_fc",activation_fn=tf.nn.softmax)
@@ -229,7 +238,7 @@ def O_Net(inputs,label=None,bbox_target=None,landmark_target=None,training=True)
         print(net.get_shape())
         fc_flatten = slim.flatten(net)
         print(fc_flatten.get_shape())
-        fc1 = slim.fully_connected(fc_flatten, num_outputs=256,scope="fc1")
+        fc1 = slim.fully_connected(fc_flatten, num_outputs=256,scope="fc1", activation_fn=prelu)
         print(fc1.get_shape())
         #batch*2
         cls_prob = slim.fully_connected(fc1,num_outputs=2,scope="cls_fc",activation_fn=tf.nn.softmax)

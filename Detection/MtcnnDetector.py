@@ -393,7 +393,7 @@ class MtcnnDetector(object):
         for databatch in test_data:
             #databatch(image returned)
             if batch_idx % 100 == 0:
-                print("%d images done" % batch_idx)
+                print("%d out of %d images done" % (batch_idx ,test_data.size))
             im = databatch
             # pnet
             t1 = 0

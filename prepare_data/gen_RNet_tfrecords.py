@@ -6,7 +6,7 @@ import time
 
 import tensorflow as tf
 
-from tfrecord_utils import _process_image_withoutcoder, _convert_to_example_simple
+from prepare_data.tfrecord_utils import _process_image_withoutcoder, _convert_to_example_simple
 
 
 def _add_to_tfrecord(filename, image_example, tfrecord_writer):
@@ -17,7 +17,7 @@ def _add_to_tfrecord(filename, image_example, tfrecord_writer):
       name: Image name to add to the TFRecord;
       tfrecord_writer: The TFRecord writer to use for writing.
     """
-    print('---', filename)
+    #print('---', filename)
     #imaga_data:array to string
     #height:original image's height
     #width:original image's width
@@ -31,7 +31,7 @@ def _get_output_filename(output_dir, name, net):
     #st = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     #return '%s/%s_%s_%s.tfrecord' % (output_dir, name, net, st)
     #return '%s/train_PNet_landmark.tfrecord' % (output_dir)
-    return '%s/landmark_landmark.tfrecord' % (output_dir)
+    return '%s/part_landmark.tfrecord' % (output_dir)
     
 
 def run(dataset_dir, net, output_dir, name='MTCNN', shuffling=False):
@@ -56,10 +56,11 @@ def run(dataset_dir, net, output_dir, name='MTCNN', shuffling=False):
         random.shuffle(dataset)
     # Process dataset files.
     # write the data to tfrecord
-    print 'lala'
+    print('lala')
     with tf.python_io.TFRecordWriter(tf_filename) as tfrecord_writer:
         for i, image_example in enumerate(dataset):
-            sys.stdout.write('\r>> Converting image %d/%d' % (i + 1, len(dataset)))
+            if (i+1) % 100 == 0:
+                sys.stdout.write('\r>> %d/%d images has been converted' % (i+1, len(dataset)))
             sys.stdout.flush()
             filename = image_example['filename']
             _add_to_tfrecord(filename, image_example, tfrecord_writer)
@@ -72,8 +73,8 @@ def run(dataset_dir, net, output_dir, name='MTCNN', shuffling=False):
 def get_dataset(dir, net='PNet'):
     #item = 'imglists/PNet/train_%s_raw.txt' % net
     #item = 'imglists/PNet/train_%s_landmark.txt' % net
-    item = '%s/landmark_%s_aug.txt' % (net,net)
-    print item 
+    item = '%s/part_%s.txt' % (net,net)
+    print(item)
     dataset_dir = os.path.join(dir, item)
     imagelist = open(dataset_dir, 'r')
 
@@ -122,7 +123,7 @@ def get_dataset(dir, net='PNet'):
 
 
 if __name__ == '__main__':
-    dir = '.' 
+    dir = '../../DATA'
     net = '24'
-    output_directory = 'imglists/RNet'
+    output_directory = '../../DATA/imglists/RNet'
     run(dir, net, output_directory, shuffling=True)
