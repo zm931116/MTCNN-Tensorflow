@@ -39,11 +39,11 @@ def cls_ohem(cls_prob, label):
     ones = tf.ones_like(label_prob,dtype=tf.float32)
     # set pos and neg to be 1, rest to be 0
     valid_inds = tf.where(label < zeros,zeros,ones)
-    # get the number of part and landmark examples
+    # get the number of POS and NEG examples
     num_valid = tf.reduce_sum(valid_inds)
 
     keep_num = tf.cast(num_valid*num_keep_radio,dtype=tf.int32)
-    #set 0 to invalid sample
+    #FILTER OUT PART AND LANDMARK DATA
     loss = loss * valid_inds
     loss,_ = tf.nn.top_k(loss, k=keep_num)
     return tf.reduce_mean(loss)
@@ -76,25 +76,45 @@ def bbox_ohem_orginal(bbox_pred,bbox_target,label):
     _, k_index = tf.nn.top_k(square_error, k=keep_num)
     square_error = tf.gather(square_error, k_index)
     return tf.reduce_mean(square_error)
+
 #label=1 or label=-1 then do regression
 def bbox_ohem(bbox_pred,bbox_target,label):
+    '''
+
+    :param bbox_pred:
+    :param bbox_target:
+    :param label: class label
+    :return: mean euclidean loss for all the pos and part examples
+    '''
     zeros_index = tf.zeros_like(label, dtype=tf.float32)
     ones_index = tf.ones_like(label,dtype=tf.float32)
+    # keep pos and part examples
     valid_inds = tf.where(tf.equal(tf.abs(label), 1),ones_index,zeros_index)
     #(batch,)
+    #calculate square sum
     square_error = tf.square(bbox_pred-bbox_target)
     square_error = tf.reduce_sum(square_error,axis=1)
     #keep_num scalar
     num_valid = tf.reduce_sum(valid_inds)
     #keep_num = tf.cast(num_valid*num_keep_radio,dtype=tf.int32)
+    # count the number of pos and part examples
     keep_num = tf.cast(num_valid, dtype=tf.int32)
     #keep valid index square_error
     square_error = square_error*valid_inds
+    # keep top k examples, k equals to the number of positive examples
     _, k_index = tf.nn.top_k(square_error, k=keep_num)
     square_error = tf.gather(square_error, k_index)
+
     return tf.reduce_mean(square_error)
 
 def landmark_ohem(landmark_pred,landmark_target,label):
+    '''
+
+    :param landmark_pred:
+    :param landmark_target:
+    :param label:
+    :return: mean euclidean loss
+    '''
     #keep label =-2  then do landmark detection
     ones = tf.ones_like(label,dtype=tf.float32)
     zeros = tf.zeros_like(label,dtype=tf.float32)
@@ -110,12 +130,22 @@ def landmark_ohem(landmark_pred,landmark_target,label):
     return tf.reduce_mean(square_error)
     
 def cal_accuracy(cls_prob,label):
+    '''
+
+    :param cls_prob:
+    :param label:
+    :return:calculate classification accuracy for pos and neg examples only
+    '''
+    # get maximum value along axis one from cls_prob
     pred = tf.argmax(cls_prob,axis=1)
     label_int = tf.cast(label,tf.int64)
+    # return the index of pos and neg examples
     cond = tf.where(tf.greater_equal(label_int,0))
     picked = tf.squeeze(cond)
+    # gather the label of pos and neg examples
     label_picked = tf.gather(label_int,picked)
     pred_picked = tf.gather(pred,picked)
+    #calculate the mean value of a vector contains 1 and 0, 1 for correct classification, 0 for incorrect and
     accuracy_op = tf.reduce_mean(tf.cast(tf.equal(label_picked,pred_picked),tf.float32))
     return accuracy_op
 #construct Pnet
@@ -152,9 +182,11 @@ def P_Net(inputs,label=None,bbox_target=None,landmark_target=None,training=True)
         #bbox_pred_original = bbox_pred
         if training:
             #batch*2
+            # calculate classification loss
             cls_prob = tf.squeeze(conv4_1,[1,2],name='cls_prob')
             cls_loss = cls_ohem(cls_prob,label)
             #batch
+            # cal bounding box error, squared sum error
             bbox_pred = tf.squeeze(bbox_pred,[1,2],name='bbox_pred')
             bbox_loss = bbox_ohem(bbox_pred,bbox_target,label)
             #batch*10

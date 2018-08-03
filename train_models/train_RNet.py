@@ -23,6 +23,6 @@ if __name__ == '__main__':
     model_path = '../data/%s_model/RNet_landmark/RNet' % model_name
     prefix = model_path
     end_epoch = 22
-    display = 1000
+    display = 100
     lr = 0.01
     train_RNet(base_dir, prefix, end_epoch, display, lr)

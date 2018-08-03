@@ -34,8 +34,8 @@ def train_model(base_lr, loss, data_num):
     lr_op = tf.train.piecewise_constant(global_step, boundaries, lr_values)
     optimizer = tf.train.MomentumOptimizer(lr_op, 0.9)
     train_op = optimizer.minimize(loss, global_step)
-
     return train_op, lr_op
+
 '''
 certain samples mirror
 def random_flip_images(image_batch,label_batch,landmark_batch):
@@ -107,7 +107,7 @@ def train(net_factory, prefix, end_epoch, base_dir,
     if net == 'PNet':
         #dataset_dir = os.path.join(base_dir,'train_%s_ALL.tfrecord_shuffle' % net)
         dataset_dir = os.path.join(base_dir,'train_%s_landmark.tfrecord_shuffle' % net)
-        print(dataset_dir)
+        print('dataset dir is:',dataset_dir)
         image_batch, label_batch, bbox_batch,landmark_batch = read_single_tfrecord(dataset_dir, config.BATCH_SIZE, net)
         
     #RNet use 3 tfrecords to get data    
@@ -127,6 +127,7 @@ def train(net_factory, prefix, end_epoch, base_dir,
         landmark_batch_size = int(np.ceil(config.BATCH_SIZE*landmark_radio))
         assert landmark_batch_size != 0,"Batch Size Error "
         batch_sizes = [pos_batch_size,part_batch_size,neg_batch_size,landmark_batch_size]
+        #print('batch_size is:', batch_sizes)
         image_batch, label_batch, bbox_batch,landmark_batch = read_multi_tfrecords(dataset_dirs,batch_sizes, net)        
         
     #landmark_dir    
@@ -145,7 +146,7 @@ def train(net_factory, prefix, end_epoch, base_dir,
     label = tf.placeholder(tf.float32, shape=[config.BATCH_SIZE], name='label')
     bbox_target = tf.placeholder(tf.float32, shape=[config.BATCH_SIZE, 4], name='bbox_target')
     landmark_target = tf.placeholder(tf.float32,shape=[config.BATCH_SIZE,10],name='landmark_target')
-    #class,regression
+    #get loss and accuracy
     cls_loss_op,bbox_loss_op,landmark_loss_op,L2_loss_op,accuracy_op = net_factory(input_image, label, bbox_target,landmark_target,training=True)
     #train,update learning rate(3 loss)
     train_op, lr_op = train_model(base_lr, radio_cls_loss*cls_loss_op + radio_bbox_loss*bbox_loss_op + radio_landmark_loss*landmark_loss_op + L2_loss_op, num)
@@ -183,14 +184,17 @@ def train(net_factory, prefix, end_epoch, base_dir,
             #random flip
             image_batch_array,landmark_batch_array = random_flip_images(image_batch_array,label_batch_array,landmark_batch_array)
             '''
-            print image_batch_array.shape
-            print label_batch_array.shape
-            print bbox_batch_array.shape
-            print landmark_batch_array.shape
-            print label_batch_array[0]
-            print bbox_batch_array[0]
-            print landmark_batch_array[0]
+            print('im here')
+            print(image_batch_array.shape)
+            print(label_batch_array.shape)
+            print(bbox_batch_array.shape)
+            print(landmark_batch_array.shape)
+            print(label_batch_array[0])
+            print(bbox_batch_array[0])
+            print(landmark_batch_array[0])
             '''
+
+
             _,_,summary = sess.run([train_op, lr_op ,summary_op], feed_dict={input_image: image_batch_array, label: label_batch_array, bbox_target: bbox_batch_array,landmark_target:landmark_batch_array})
             
             if (step+1) % display == 0:
