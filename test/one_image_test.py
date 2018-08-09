@@ -10,7 +10,7 @@ import cv2
 import os
 import numpy as np
 test_mode = "ONet"
-thresh = [0.6, 0.5, 0.4]
+thresh = [0.5, 0.7, 0.7]
 min_face_size = 24
 stride = 2
 slide_window = False
@@ -18,7 +18,7 @@ shuffle = False
 detectors = [None, None, None]
 prefix = ['../data/MTCNN_model/PNet_landmark/PNet', '../data/MTCNN_model/RNet_landmark/RNet', '../data/MTCNN_model/ONet_landmark/ONet']
 epoch = [18, 14, 16]
-batch_size = [2048, 256, 16]
+batch_size = [2048, 64, 16]
 model_path = ['%s-%s' % (x, y) for x, y in zip(prefix, epoch)]
 # load pnet model
 if slide_window:
@@ -44,12 +44,15 @@ gt_imdb = []
 #imdb_ = dict()"
 #imdb_['image'] = im_path
 #imdb_['label'] = 5
-path = "../../DATA/WIDER_val/images/35--Basketball"
+path = "../../DATA/originalPics/2002/07/19/big"
 for item in os.listdir(path):
     gt_imdb.append(os.path.join(path,item))
 test_data = TestLoader(gt_imdb)
+
+
 all_boxes,landmarks = mtcnn_detector.detect_face(test_data)
-count = 0
+
+'''
 for imagepath in gt_imdb:
     print(imagepath)
     image = cv2.imread(imagepath)
@@ -66,6 +69,8 @@ for imagepath in gt_imdb:
     #cv2.imwrite("result_landmark/%d.png" %(count),image)
     cv2.imshow("lala",image)
     cv2.waitKey(0)    
+'''
+
 
 '''
 for data in test_data:

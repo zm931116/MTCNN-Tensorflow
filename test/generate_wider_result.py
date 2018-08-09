@@ -14,6 +14,7 @@ import os
 
 data_dir = '../../DATA/WIDER_val/images'
 anno_file = 'wider_face_val.txt'
+output_file = '../../DATA/WIDER_OUTPUT_06/'
 
 
 def read_gt_bbox(raw_list):
@@ -46,9 +47,9 @@ def get_image_info(anno_file):
 
 if __name__ == '__main__':
 
-    test_mode = "ONet"
-    thresh = [0.5, 0.15, 0.05]
-    min_face_size = 12
+    test_mode = "RNet"
+    thresh = [0.6, 0.7, 0.5]
+    min_face_size = 20
     stride = 2
     slide_window = False
     shuffle = False
@@ -90,7 +91,7 @@ if __name__ == '__main__':
         if current_event != item[0]:
 
             current_event = item[0]
-            save_path = os.path.join('../../DATA/WIDER_OUTPUT/', item[0])
+            save_path = os.path.join(output_file, item[0])
             if not os.path.exists(save_path):
                 os.mkdir(save_path)
             print('current path:', current_event)
