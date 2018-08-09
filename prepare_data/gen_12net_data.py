@@ -29,7 +29,7 @@ num = len(annotations)
 print("%d pics in total" % num)
 p_idx = 0 # positive
 n_idx = 0 # negative
-d_idx = 0 # dont care
+d_idx = 0 # don't care
 idx = 0
 box_idx = 0
 for annotation in annotations:

@@ -25,7 +25,7 @@ class FcnDetector(object):
             self.cls_prob, self.bbox_pred, _ = net_factory(image_reshape, training=False)
             
             #allow 
-            self.sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True, gpu_options=tf.GPUOptions(allow_growth=True)))
+            self.sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True, gpu_options=tf.GPUOptions(allow_growth=False)))
             saver = tf.train.Saver()
             #check whether the dictionary is valid
             model_dict = '/'.join(model_path.split('/')[:-1])

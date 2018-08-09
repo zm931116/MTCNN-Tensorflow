@@ -49,7 +49,6 @@ with open(os.path.join(dir_path, "%s" %(net),"train_%s_landmark.txt" % (net)), "
     print(len(neg_keep), len(pos_keep), len(part_keep))
 
     # write the data according to the shuffled order
-
     for i in pos_keep:
         f.write(pos[i])
     for i in neg_keep:

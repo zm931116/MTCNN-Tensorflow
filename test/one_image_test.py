@@ -10,7 +10,7 @@ import cv2
 import os
 import numpy as np
 test_mode = "ONet"
-thresh = [0.9, 0.6, 0.7]
+thresh = [0.6, 0.5, 0.4]
 min_face_size = 24
 stride = 2
 slide_window = False
@@ -44,7 +44,7 @@ gt_imdb = []
 #imdb_ = dict()"
 #imdb_['image'] = im_path
 #imdb_['label'] = 5
-path = "lala"
+path = "../../DATA/WIDER_val/images/35--Basketball"
 for item in os.listdir(path):
     gt_imdb.append(os.path.join(path,item))
 test_data = TestLoader(gt_imdb)
@@ -58,7 +58,8 @@ for imagepath in gt_imdb:
         cv2.rectangle(image, (int(bbox[0]),int(bbox[1])),(int(bbox[2]),int(bbox[3])),(0,0,255))
         
     for landmark in landmarks[count]:
-        for i in range(len(landmark)/2):
+
+        for i in range(len(landmark)//2):
             cv2.circle(image, (int(landmark[2*i]),int(int(landmark[2*i+1]))), 3, (0,0,255))
         
     count = count + 1

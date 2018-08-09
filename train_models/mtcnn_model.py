@@ -9,6 +9,7 @@ def prelu(inputs):
     pos = tf.nn.relu(inputs)
     neg = alphas * (inputs-abs(inputs))*0.5
     return pos + neg
+
 def dense_to_one_hot(labels_dense,num_classes):
     num_labels = labels_dense.shape[0]
     index_offset = np.arange(num_labels)*num_classes
@@ -136,7 +137,8 @@ def cal_accuracy(cls_prob,label):
     :param label:
     :return:calculate classification accuracy for pos and neg examples only
     '''
-    # get maximum value along axis one from cls_prob
+    # get the index of maximum value along axis one from cls_prob
+    # 0 for negative 1 for positive
     pred = tf.argmax(cls_prob,axis=1)
     label_int = tf.cast(label,tf.int64)
     # return the index of pos and neg examples
@@ -145,9 +147,16 @@ def cal_accuracy(cls_prob,label):
     # gather the label of pos and neg examples
     label_picked = tf.gather(label_int,picked)
     pred_picked = tf.gather(pred,picked)
-    #calculate the mean value of a vector contains 1 and 0, 1 for correct classification, 0 for incorrect and
+    #calculate the mean value of a vector contains 1 and 0, 1 for correct classification, 0 for incorrect
+    # ACC = (TP+FP)/total population
     accuracy_op = tf.reduce_mean(tf.cast(tf.equal(label_picked,pred_picked),tf.float32))
     return accuracy_op
+
+
+
+
+
+
 #construct Pnet
 #label:batch
 def P_Net(inputs,label=None,bbox_target=None,landmark_target=None,training=True):
@@ -270,7 +279,7 @@ def O_Net(inputs,label=None,bbox_target=None,landmark_target=None,training=True)
         print(net.get_shape())
         fc_flatten = slim.flatten(net)
         print(fc_flatten.get_shape())
-        fc1 = slim.fully_connected(fc_flatten, num_outputs=256,scope="fc1", activation_fn=prelu)
+        fc1 = slim.fully_connected(fc_flatten, num_outputs=256,scope="fc1")
         print(fc1.get_shape())
         #batch*2
         cls_prob = slim.fully_connected(fc1,num_outputs=2,scope="cls_fc",activation_fn=tf.nn.softmax)

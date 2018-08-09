@@ -155,7 +155,7 @@ def t_net(prefix, epoch,
     basedir = '../../DATA/'
     #anno_file
     filename = './wider_face_train_bbx_gt.txt'
-    #read anotation(type:dict)
+    #read anotation(type:dict), include 'images' and 'bboxes'
     data = read_annotation(basedir,filename)
     mtcnn_detector = MtcnnDetector(detectors=detectors, min_face_size=min_face_size,
                                    stride=stride, threshold=thresh, slide_window=slide_window)
@@ -193,7 +193,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Test mtcnn',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--test_mode', dest='test_mode', help='test net type, can be pnet, rnet or onet',
-                        default='PNet', type=str)
+                        default='RNet', type=str)
     parser.add_argument('--prefix', dest='prefix', help='prefix of model name', nargs="+",
                         default=['../data/MTCNN_model/PNet_landmark/PNet', '../data/MTCNN_model/RNet_landmark/RNet', '../data/MTCNN_model/ONet/ONet'],
                         type=str)
@@ -217,7 +217,7 @@ def parse_args():
 
 if __name__ == '__main__':
 
-    net = 'RNet'
+    net = 'ONet'
     if net == "RNet":
         image_size = 24
     if net == "ONet":

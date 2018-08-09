@@ -121,7 +121,7 @@ def train(net_factory, prefix, end_epoch, base_dir,
         pos_batch_size = int(np.ceil(config.BATCH_SIZE*pos_radio))
         assert pos_batch_size != 0,"Batch Size Error "
         part_batch_size = int(np.ceil(config.BATCH_SIZE*part_radio))
-        assert part_batch_size != 0,"Batch Size Error "        
+        assert part_batch_size != 0,"Batch Size Error "
         neg_batch_size = int(np.ceil(config.BATCH_SIZE*neg_radio))
         assert neg_batch_size != 0,"Batch Size Error "
         landmark_batch_size = int(np.ceil(config.BATCH_SIZE*landmark_radio))
@@ -149,7 +149,10 @@ def train(net_factory, prefix, end_epoch, base_dir,
     #get loss and accuracy
     cls_loss_op,bbox_loss_op,landmark_loss_op,L2_loss_op,accuracy_op = net_factory(input_image, label, bbox_target,landmark_target,training=True)
     #train,update learning rate(3 loss)
-    train_op, lr_op = train_model(base_lr, radio_cls_loss*cls_loss_op + radio_bbox_loss*bbox_loss_op + radio_landmark_loss*landmark_loss_op + L2_loss_op, num)
+    total_loss_op  = radio_cls_loss*cls_loss_op + radio_bbox_loss*bbox_loss_op + radio_landmark_loss*landmark_loss_op + L2_loss_op
+    train_op, lr_op = train_model(base_lr,
+                                  total_loss_op,
+                                  num)
     # init
     init = tf.global_variables_initializer()
     sess = tf.Session()
@@ -161,6 +164,7 @@ def train(net_factory, prefix, end_epoch, base_dir,
     tf.summary.scalar("bbox_loss",bbox_loss_op)#bbox_loss
     tf.summary.scalar("landmark_loss",landmark_loss_op)#landmark_loss
     tf.summary.scalar("cls_accuracy",accuracy_op)#cls_acc
+    tf.summary.scalar("total_loss",total_loss_op)#cls_loss, bbox loss, landmark loss and L2 loss add together
     summary_op = tf.summary.merge_all()
     logs_dir = "../logs/%s" %(net)
     if os.path.exists(logs_dir) == False:
@@ -200,9 +204,11 @@ def train(net_factory, prefix, end_epoch, base_dir,
             if (step+1) % display == 0:
                 #acc = accuracy(cls_pred, labels_batch)
                 cls_loss, bbox_loss,landmark_loss,L2_loss,lr,acc = sess.run([cls_loss_op, bbox_loss_op,landmark_loss_op,L2_loss_op,lr_op,accuracy_op],
-                                                             feed_dict={input_image: image_batch_array, label: label_batch_array, bbox_target: bbox_batch_array, landmark_target: landmark_batch_array})                
-                print("%s : Step: %d, accuracy: %3f, cls loss: %4f, bbox loss: %4f, landmark loss: %4f,L2 loss: %4f,lr:%f " % (
-                datetime.now(), step+1, acc, cls_loss, bbox_loss, landmark_loss, L2_loss, lr))
+                                                             feed_dict={input_image: image_batch_array, label: label_batch_array, bbox_target: bbox_batch_array, landmark_target: landmark_batch_array})
+
+                total_loss = radio_cls_loss*cls_loss + radio_bbox_loss*bbox_loss + radio_landmark_loss*landmark_loss + L2_loss
+                print("%s : Step: %d, accuracy: %3f, cls loss: %4f, bbox loss: %4f, landmark loss: %4f,L2 loss: %4f, Total Loss: %4f ,lr:%f " % (
+                datetime.now(), step+1, acc, cls_loss, bbox_loss, landmark_loss, L2_loss,total_loss, lr))
             #save every two epochs
             if i * config.BATCH_SIZE > num*2:
                 epoch = epoch + 1
