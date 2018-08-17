@@ -11,11 +11,7 @@ from prepare_data.BBox_utils import getDataFromTxt, BBox
 from prepare_data.Landmark_utils import rotate, flip
 from prepare_data.utils import IoU
 
-dstdir = "../../DATA/12/train_PNet_landmark_aug"
-OUTPUT = '../../DATA/12'
-if not exists(OUTPUT): os.mkdir(OUTPUT)
-if not exists(dstdir): os.mkdir(dstdir)
-assert(exists(dstdir) and exists(OUTPUT))
+
 
 
 def GenerateData(ftxt, output,net,argument=False):
@@ -61,10 +57,10 @@ def GenerateData(ftxt, output,net,argument=False):
         #initialize the landmark
         landmark = np.zeros((5, 2))
 
-        #normalize land mark by dividing the width and height of the bounding box
+        #normalize land mark by dividing the width and height of the ground truth bounding box
         # landmakrGt is a list of tuples
         for index, one in enumerate(landmarkGt):
-            # (( x - bbox.left)/ (bbx.right - bbox.left), (y - bbox.top)/ (bbox.bottom - bbox.top)
+            # (( x - bbox.left)/ width of bounding box, (y - bbox.top)/ height of bounding box
             rv = ((one[0]-gt_box[0])/(gt_box[2]-gt_box[0]), (one[1]-gt_box[1])/(gt_box[3]-gt_box[1]))
             # put the normalized value into the new list landmark
             landmark[index] = rv
@@ -178,9 +174,16 @@ def GenerateData(ftxt, output,net,argument=False):
     return F_imgs,F_landmarks
 
 if __name__ == '__main__':
+    dstdir = "../../DATA/12/train_PNet_landmark_aug"
+    OUTPUT = '../../DATA/12'
+    if not exists(OUTPUT):
+        os.mkdir(OUTPUT)
+    if not exists(dstdir):
+        os.mkdir(dstdir)
+    assert (exists(dstdir) and exists(OUTPUT))
     # train data
     net = "PNet"
-    #train_txt = "train.txt"
+    #the file contains the names of all the landmark training data
     train_txt = "trainImageList.txt"
     imgs,landmarks = GenerateData(train_txt, OUTPUT,net,argument=True)
     

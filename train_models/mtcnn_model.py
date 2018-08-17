@@ -174,6 +174,7 @@ def P_Net(inputs,label=None,bbox_target=None,landmark_target=None,training=True)
         print(net.get_shape())
         net = slim.conv2d(net,num_outputs=16,kernel_size=[3,3],stride=1,scope='conv2')
         print(net.get_shape())
+        #
         net = slim.conv2d(net,num_outputs=32,kernel_size=[3,3],stride=1,scope='conv3')
         print(net.get_shape())
         #batch*H*W*2

@@ -31,7 +31,7 @@ def _get_output_filename(output_dir, name, net):
     #st = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     #return '%s/%s_%s_%s.tfrecord' % (output_dir, name, net, st)
     #return '%s/train_PNet_landmark.tfrecord' % (output_dir)
-    return '%s/neg_landmark.tfrecord' % (output_dir)
+    return '%s/%s_landmark.tfrecord' % (output_dir,name)
     
 
 def run(dataset_dir, net, output_dir, name='MTCNN', shuffling=False):
@@ -48,7 +48,7 @@ def run(dataset_dir, net, output_dir, name='MTCNN', shuffling=False):
         print('Dataset files already exist. Exiting without re-creating them.')
         return
     # GET Dataset, and shuffling.
-    dataset = get_dataset(dataset_dir, net=net)
+    dataset = get_dataset(dataset_dir,name, net=net)
     # filenames = dataset['filename']
     if shuffling:
         tf_filename = tf_filename + '_shuffle'
@@ -70,12 +70,19 @@ def run(dataset_dir, net, output_dir, name='MTCNN', shuffling=False):
     print('\nFinished converting the MTCNN dataset!')
 
 
-def get_dataset(dir, net='PNet'):
+def get_dataset(dir, name, net='PNet'):
+    '''
+
+    :param dir: directory of the raw data
+    :param net:
+    :return:
+    '''
     #item = 'imglists/PNet/train_%s_raw.txt' % net
     #item = 'imglists/PNet/train_%s_landmark.txt' % net
-    item = '%s/neg_%s.txt' % (net,net)
-    print(item)
+    item = '%s/%s_24.txt' % (net,name)
+
     dataset_dir = os.path.join(dir, item)
+    print('dataset dir is :', dataset_dir)
     imagelist = open(dataset_dir, 'r')
 
     dataset = []
@@ -124,6 +131,9 @@ def get_dataset(dir, net='PNet'):
 
 if __name__ == '__main__':
     dir = '../../DATA'
-    net = '24'
-    output_directory = '../../DATA/imglists/RNet'
-    run(dir, net, output_directory, shuffling=True)
+    net = 'no_LM24'
+    output_directory = '../../DATA/imglists_noLM/RNet'
+    if not os.path.exists(output_directory):
+        os.makedirs(output_directory)
+    name = 'part'
+    run(dir, net, output_directory,name, shuffling=True)

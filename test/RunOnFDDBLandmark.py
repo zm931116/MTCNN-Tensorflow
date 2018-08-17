@@ -31,8 +31,8 @@ def get_imdb_fddb(data_dir):
 
 if __name__ == "__main__":
     test_mode = "ONet"
-    thresh = [0.6,0.15,0.05]
-    min_face_size = 24
+    thresh = [0.6,0.35,0.01]
+    min_face_size = 20
     stride = 2
     slide_window = False
     shuffle = False

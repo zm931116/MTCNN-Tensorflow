@@ -115,7 +115,8 @@ def train(net_factory, prefix, end_epoch, base_dir,
         pos_dir = os.path.join(base_dir,'pos_landmark.tfrecord_shuffle')
         part_dir = os.path.join(base_dir,'part_landmark.tfrecord_shuffle')
         neg_dir = os.path.join(base_dir,'neg_landmark.tfrecord_shuffle')
-        landmark_dir = os.path.join(base_dir,'landmark_landmark.tfrecord_shuffle')
+        #landmark_dir = os.path.join(base_dir,'landmark_landmark.tfrecord_shuffle')
+        landmark_dir = os.path.join('../../DATA/imglists/RNet','landmark_landmark.tfrecord_shuffle')
         dataset_dirs = [pos_dir,part_dir,neg_dir,landmark_dir]
         pos_radio = 1.0/6;part_radio = 1.0/6;landmark_radio=1.0/6;neg_radio=3.0/6
         pos_batch_size = int(np.ceil(config.BATCH_SIZE*pos_radio))
@@ -133,12 +134,12 @@ def train(net_factory, prefix, end_epoch, base_dir,
     #landmark_dir    
     if net == 'PNet':
         image_size = 12
-        radio_cls_loss = 1.0;radio_bbox_loss = 0.5;radio_landmark_loss = 0.5;
+        radio_cls_loss = 1.0;radio_bbox_loss = 0.5;radio_landmark_loss = 0;
     elif net == 'RNet':
         image_size = 24
-        radio_cls_loss = 1.0;radio_bbox_loss = 0.5;radio_landmark_loss = 0.5;
+        radio_cls_loss = 1.0;radio_bbox_loss = 0.5;radio_landmark_loss = 0;
     else:
-        radio_cls_loss = 1.0;radio_bbox_loss = 0.5;radio_landmark_loss = 1.0;
+        radio_cls_loss = 1.0;radio_bbox_loss = 0.5;radio_landmark_loss = 0;
         image_size = 48
     
     #define placeholder
@@ -166,7 +167,7 @@ def train(net_factory, prefix, end_epoch, base_dir,
     tf.summary.scalar("cls_accuracy",accuracy_op)#cls_acc
     tf.summary.scalar("total_loss",total_loss_op)#cls_loss, bbox loss, landmark loss and L2 loss add together
     summary_op = tf.summary.merge_all()
-    logs_dir = "../logs/%s" %(net)
+    logs_dir = "../logs/no_Landmark/%s" %(net)
     if os.path.exists(logs_dir) == False:
         os.mkdir(logs_dir)
     writer = tf.summary.FileWriter(logs_dir,sess.graph)
@@ -207,8 +208,9 @@ def train(net_factory, prefix, end_epoch, base_dir,
                                                              feed_dict={input_image: image_batch_array, label: label_batch_array, bbox_target: bbox_batch_array, landmark_target: landmark_batch_array})
 
                 total_loss = radio_cls_loss*cls_loss + radio_bbox_loss*bbox_loss + radio_landmark_loss*landmark_loss + L2_loss
-                print("%s : Step: %d, accuracy: %3f, cls loss: %4f, bbox loss: %4f, landmark loss: %4f,L2 loss: %4f, Total Loss: %4f ,lr:%f " % (
-                datetime.now(), step+1, acc, cls_loss, bbox_loss, landmark_loss, L2_loss,total_loss, lr))
+                # landmark loss: %4f,
+                print("%s : Step: %d, accuracy: %3f, cls loss: %4f, bbox loss: %4f,L2 loss: %4f, Total Loss: %4f ,lr:%f " % (
+                datetime.now(), step+1, acc, cls_loss, bbox_loss, L2_loss,total_loss, lr))
             #save every two epochs
             if i * config.BATCH_SIZE > num*2:
                 epoch = epoch + 1

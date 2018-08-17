@@ -74,9 +74,10 @@ class MtcnnDetector(object):
         bbox_c[:, 0:4] = bbox_c[:, 0:4] + aug
         return bbox_c
 
+
     def generate_bbox(self, cls_map, reg, scale, threshold):
         """
-            generate bbox from feature cls_map
+            generate bbox from feature cls_map according to the threshold
         Parameters:
         ----------
             cls_map: numpy array , n x m 
@@ -118,6 +119,12 @@ class MtcnnDetector(object):
 
     # pre-process images
     def processed_image(self, img, scale):
+        '''
+        rescale/resize the image according to the scale
+        :param img: image
+        :param scale:
+        :return: resized image
+        '''
         height, width, channels = img.shape
         new_height = int(height * scale)  # resized new height
         new_width = int(width * scale)  # resized new width
@@ -203,6 +210,7 @@ class MtcnnDetector(object):
         # risize image using current_scale
         im_resized = self.processed_image(im, current_scale)
         current_height, current_width, _ = im_resized.shape
+        #print('current height and width:',current_height,current_width)
         # fcn
         all_boxes = list()
         while min(current_height, current_width) > net_size:
@@ -396,6 +404,7 @@ class MtcnnDetector(object):
         all_boxes = []  # save each image's bboxes
         landmarks = []
         batch_idx = 0
+
         sum_time = 0
         t1_sum = 0
         t2_sum = 0
@@ -403,25 +412,27 @@ class MtcnnDetector(object):
         num_of_img = test_data.size
         empty_array = np.array([])
         # test_data is iter_
+        s_time = time.time()
         for databatch in test_data:
             # databatch(image returned)
-            '''
-                        if batch_idx % 100 == 0:
-                c_time = (sum_time - b_time)/100
+            batch_idx += 1
+            if batch_idx % 100 == 0:
+                c_time = (time.time() - s_time )/100
                 print("%d out of %d images done" % (batch_idx ,test_data.size))
                 print('%f seconds for each image' % c_time)
-                b_time = sum_time
-            '''
+                s_time = time.time()
+
 
             im = databatch
             # pnet
 
 
             if self.pnet_detector:
-                t = time.time()
+                st = time.time()
                 # ignore landmark
                 boxes, boxes_c, landmark = self.detect_pnet(im)
-                t1 = time.time() - t
+
+                t1 = time.time() - st
                 sum_time += t1
                 t1_sum += t1
                 if boxes_c is None:
@@ -431,6 +442,7 @@ class MtcnnDetector(object):
                     landmarks.append(empty_array)
 
                     continue
+                #print(all_boxes)
 
             # rnet
 
@@ -460,8 +472,9 @@ class MtcnnDetector(object):
 
                     continue
 
-                all_boxes.append(boxes_c)
-                landmarks.append(landmark)
+            all_boxes.append(boxes_c)
+            landmark = [1]
+            landmarks.append(landmark)
         print('num of images', num_of_img)
         print("time cost in average" +
             '{:.3f}'.format(sum_time/num_of_img) +
@@ -469,6 +482,7 @@ class MtcnnDetector(object):
 
 
         # num_of_data*9,num_of_data*10
+        print('boxes length:',len(all_boxes))
         return all_boxes, landmarks
 
     def detect_single_image(self, im):
