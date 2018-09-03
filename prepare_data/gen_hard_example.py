@@ -15,7 +15,7 @@ from prepare_data.loader import TestLoader
 from Detection.detector import Detector
 from Detection.fcn_detector import FcnDetector
 from Detection.MtcnnDetector import MtcnnDetector
-from utils import *
+from prepare_data.utils import *
 from prepare_data.data_utils import *
 #net : 24(RNet)/48(ONet)
 #data: dict()
@@ -32,13 +32,13 @@ def save_hard_example(net, data,save_path):
 
     
     # save files
-    neg_label_file = "../../DATA/no_LM%d/neg_%d.txt" % (net, image_size)
+    neg_label_file = "../../DATA/%d/neg_%d.txt" % (net, image_size)
     neg_file = open(neg_label_file, 'w')
 
-    pos_label_file = "../../DATA/no_LM%d/pos_%d.txt" % (net, image_size)
+    pos_label_file = "../../DATA/%d/pos_%d.txt" % (net, image_size)
     pos_file = open(pos_label_file, 'w')
 
-    part_label_file = "../../DATA/no_LM%d/part_%d.txt" % (net, image_size)
+    part_label_file = "../../DATA/%d/part_%d.txt" % (net, image_size)
     part_file = open(part_label_file, 'w')
     #read detect result
     det_boxes = pickle.load(open(os.path.join(save_path, 'detections.pkl'), 'rb'))
@@ -126,13 +126,13 @@ def save_hard_example(net, data,save_path):
 
 def t_net(prefix, epoch,
              batch_size, test_mode="PNet",
-             thresh=[0.6, 0.6, 0.7], min_face_size=25,
+             thresh=[0.3, 0.1, 0.7], min_face_size=20,
              stride=2, slide_window=False, shuffle=False, vis=False):
     detectors = [None, None, None]
-    print("Test model: ", test_mode)
+
     #PNet-echo
     model_path = ['%s-%s' % (x, y) for x, y in zip(prefix, epoch)]
-    print(model_path[0])
+
     # load pnet model
     if slide_window:
         PNet = Detector(P_Net, 12, batch_size[0], model_path[0])
@@ -142,7 +142,7 @@ def t_net(prefix, epoch,
 
     # load rnet model
     if test_mode in ["RNet", "ONet"]:
-        print("==================================", test_mode)
+        print("================Test mode==================", test_mode)
         RNet = Detector(R_Net, 24, batch_size[1], model_path[1])
         detectors[1] = RNet
 
@@ -193,16 +193,16 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Test mtcnn',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--test_mode', dest='test_mode', help='test net type, can be pnet, rnet or onet',
-                        default='RNet', type=str)
+                        default='PNet', type=str)
     parser.add_argument('--prefix', dest='prefix', help='prefix of model name', nargs="+",
-                        default=['../data/MTCNN_model/PNet_No_Landmark/PNet', '../data/MTCNN_model/RNet_No_Landmark/RNet', '../data/MTCNN_model/ONet_No_Landmark/ONet'],
+                        default=['../data/MTCNN_l1Smoothed_model/PNet_landmark/PNet', '../data/MTCNN_l1Smoothed_model/RNet_landmark/RNet', '../data/MTCNN_model/ONet_landmark/ONet'],
                         type=str)
     parser.add_argument('--epoch', dest='epoch', help='epoch number of model to load', nargs="+",
-                        default=[18, 14, 16], type=int)
+                        default=[20, 20, 24], type=int)
     parser.add_argument('--batch_size', dest='batch_size', help='list of batch size used in prediction', nargs="+",
                         default=[2048, 256, 16], type=int)
     parser.add_argument('--thresh', dest='thresh', help='list of thresh for pnet, rnet, onet', nargs="+",
-                        default=[0.3, 0.1, 0.7], type=float)
+                        default=[0.3, 0.1, 0.1], type=float)
     parser.add_argument('--min_face', dest='min_face', help='minimum face size for detection',
                         default=20, type=int)
     parser.add_argument('--stride', dest='stride', help='stride of sliding window',
@@ -217,7 +217,8 @@ def parse_args():
 
 if __name__ == '__main__':
 
-    net = 'ONet'
+    #generate data for which net
+    net = 'RNet'
 
     if net == "RNet":
         image_size = 24
@@ -225,10 +226,10 @@ if __name__ == '__main__':
         image_size = 48
 
     base_dir = '../../DATA/WIDER_train'
-    data_dir = '../../DATA/no_LM%s' % str(image_size)
+    data_dir = '../../DATA/%s' % str(image_size)
     
-    neg_dir = get_path(data_dir, 'negative')
-    pos_dir = get_path(data_dir, 'positive')
+    neg_dir = get_path(data_dir, 'neg')
+    pos_dir = get_path(data_dir, 'pos')
     part_dir = get_path(data_dir, 'part')
     #create dictionary shuffle   
     for dir_path in [neg_dir, pos_dir, part_dir]:

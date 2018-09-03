@@ -101,16 +101,17 @@ def train(net_factory, prefix, end_epoch, base_dir,
     :param base_lr:
     :return:
     """
+
     net = prefix.split('/')[-1]
     #label file
     label_file = os.path.join(base_dir,'train_%s_landmark.txt' % net)
     #label_file = os.path.join(base_dir,'landmark_12_few.txt')
-    print(label_file)
+    print('label file is: ',label_file)
     f = open(label_file, 'r')
     # get number of training examples
     num = len(f.readlines())
     print("Total size of the dataset is: ", num)
-    print(prefix)
+
 
     #PNet use this method to get data
     if net == 'PNet':
@@ -121,12 +122,14 @@ def train(net_factory, prefix, end_epoch, base_dir,
         
     #RNet use 3 tfrecords to get data    
     else:
+
         pos_dir = os.path.join(base_dir,'pos_landmark.tfrecord_shuffle')
         part_dir = os.path.join(base_dir,'part_landmark.tfrecord_shuffle')
         neg_dir = os.path.join(base_dir,'neg_landmark.tfrecord_shuffle')
-        #landmark_dir = os.path.join(base_dir,'landmark_landmark.tfrecord_shuffle')
-        landmark_dir = os.path.join('../../DATA/imglists/RNet','landmark_landmark.tfrecord_shuffle')
+        landmark_dir = os.path.join(base_dir,'landmark_landmark.tfrecord_shuffle')
+        #landmark_dir = os.path.join('../../DATA/imglists/RNet','landmark_landmark.tfrecord_shuffle')
         dataset_dirs = [pos_dir,part_dir,neg_dir,landmark_dir]
+        print(dataset_dirs)
         pos_radio = 1.0/6;part_radio = 1.0/6;landmark_radio=1.0/6;neg_radio=3.0/6
         pos_batch_size = int(np.ceil(config.BATCH_SIZE*pos_radio))
         assert pos_batch_size != 0,"Batch Size Error "
@@ -139,7 +142,7 @@ def train(net_factory, prefix, end_epoch, base_dir,
         batch_sizes = [pos_batch_size,part_batch_size,neg_batch_size,landmark_batch_size]
         #print('batch_size is:', batch_sizes)
         image_batch, label_batch, bbox_batch,landmark_batch = read_multi_tfrecords(dataset_dirs,batch_sizes, net)        
-        
+        #print(image_batch)
     #landmark_dir    
     if net == 'PNet':
         image_size = 12
@@ -152,12 +155,17 @@ def train(net_factory, prefix, end_epoch, base_dir,
         image_size = 48
     
     #define placeholder
+
     input_image = tf.placeholder(tf.float32, shape=[config.BATCH_SIZE, image_size, image_size, 3], name='input_image')
     label = tf.placeholder(tf.float32, shape=[config.BATCH_SIZE], name='label')
     bbox_target = tf.placeholder(tf.float32, shape=[config.BATCH_SIZE, 4], name='bbox_target')
     landmark_target = tf.placeholder(tf.float32,shape=[config.BATCH_SIZE,10],name='landmark_target')
-    #get loss and accuracy
+
+    #do color distort to the training batch
+    #tf.summary.image(name='initial_img', tensor=input_image, max_outputs=3)
     input_image = image_color_distort(input_image)
+    tf.summary.image(name='distort_img', tensor=input_image,max_outputs=3)
+    # get loss and accuracy
     cls_loss_op,bbox_loss_op,landmark_loss_op,L2_loss_op,accuracy_op = net_factory(input_image, label, bbox_target,landmark_target,training=True)
     #train,update learning rate(3 loss)
     total_loss_op  = radio_cls_loss*cls_loss_op + radio_bbox_loss*bbox_loss_op + radio_landmark_loss*landmark_loss_op + L2_loss_op
@@ -166,7 +174,13 @@ def train(net_factory, prefix, end_epoch, base_dir,
                                   num)
     # init
     init = tf.global_variables_initializer()
-    sess = tf.Session()
+
+
+    sess_config = tf.ConfigProto(log_device_placement=False,allow_soft_placement=True)
+    sess_config.gpu_options.per_process_gpu_memory_fraction = 0.5
+    sess_config.gpu_options.allow_growth = True
+
+    sess = tf.Session(config=sess_config)
 
 
     #save model
@@ -180,12 +194,11 @@ def train(net_factory, prefix, end_epoch, base_dir,
     tf.summary.scalar("cls_accuracy",accuracy_op)#cls_acc
     tf.summary.scalar("total_loss",total_loss_op)#cls_loss, bbox loss, landmark loss and L2 loss add together
     summary_op = tf.summary.merge_all()
-    logs_dir = "../logs/%s" %(net)
+    logs_dir = "../logs/%s_L1" %(net)
     if os.path.exists(logs_dir) == False:
         os.mkdir(logs_dir)
     writer = tf.summary.FileWriter(logs_dir,sess.graph)
-    projector_config = projector.ProjectorConfig()
-    projector.visualize_embeddings(writer,projector_config)
+
     #begin 
     coord = tf.train.Coordinator()
     #begin enqueue thread
@@ -206,16 +219,8 @@ def train(net_factory, prefix, end_epoch, base_dir,
             image_batch_array, label_batch_array, bbox_batch_array,landmark_batch_array = sess.run([image_batch, label_batch, bbox_batch,landmark_batch])
             #random flip
             image_batch_array,landmark_batch_array = random_flip_images(image_batch_array,label_batch_array,landmark_batch_array)
-            '''
-            print('im here')
-            print(image_batch_array.shape)
-            print(label_batch_array.shape)
-            print(bbox_batch_array.shape)
-            print(landmark_batch_array.shape)
-            print(label_batch_array[0])
-            print(bbox_batch_array[0])
-            print(landmark_batch_array[0])
-            '''
+
+
 
 
             _,_,summary = sess.run([train_op, lr_op ,summary_op], feed_dict={input_image: image_batch_array, label: label_batch_array, bbox_target: bbox_batch_array,landmark_target:landmark_batch_array})

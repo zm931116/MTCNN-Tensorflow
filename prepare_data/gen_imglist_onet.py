@@ -23,7 +23,7 @@ with open(os.path.join(data_dir, '%s/neg_%s.txt' % (size, size)), 'r') as f:
 with open(os.path.join(data_dir, '%s/part_%s.txt' % (size, size)), 'r') as f:
     part = f.readlines()
 
-with open(os.path.join(data_dir, '%s/landmark_%s_aug.txt' % (size, size)), 'r') as f:
+with open(os.path.join(data_dir, '%s/landmark_%s.txt' % (size, size)), 'r') as f:
     landmark = f.readlines()
   
 dir_path = os.path.join(data_dir, 'imglists',"ONet")

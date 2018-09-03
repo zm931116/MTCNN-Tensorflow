@@ -45,7 +45,7 @@ def IoU(box, boxes):
     inter = w * h
     ovr = inter*1.0 / (box_area + area - inter)
     return ovr
-def GenerateData(ftxt, output,net,argument=False):
+def GenerateData(ftxt, data_path,net,argument=False):
     if net == "PNet":
         size = 12
     elif net == "RNet":
@@ -56,8 +56,8 @@ def GenerateData(ftxt, output,net,argument=False):
         print('Net type error')
         return
     image_id = 0
-    f = open(join(OUTPUT,"landmark_%s_aug.txt" %(size)),'w')
-    data = getDataFromTxt(ftxt)
+    f = open(join(OUTPUT,"landmark_%s.txt" %(size)),'w')
+    data = getDataFromTxt(ftxt,data_path=data_path)
     idx = 0
     #image_path bbox landmark(5*2)
     for (imgPath, bbox, landmarkGt) in data:
@@ -186,6 +186,7 @@ if __name__ == '__main__':
     net = "RNet"
     #train_txt = "train.txt"
     train_txt = "trainImageList.txt"
-    imgs,landmarks = GenerateData(train_txt, OUTPUT,net,argument=True)
+    data_path = '../../DATA'
+    imgs,landmarks = GenerateData(train_txt, data_path,net,argument=True)
     
    

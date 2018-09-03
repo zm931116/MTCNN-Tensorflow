@@ -46,10 +46,12 @@ if __name__ == '__main__':
 
     data_dir = '../../DATA/WIDER_val/images'
     anno_file = 'wider_face_val.txt'
-    output_file = '../../DATA/WIDER_NoLM_RNet_0.3_0.1/'
+    output_file = '../../DATA/RNet/ONet_61505_epoch20/'
+    if not os.path.exists(output_file):
+        os.mkdir(output_file)
 
-    test_mode = "RNet"
-    thresh = [0.3, 0.1, 0.7]
+    test_mode = "ONet"
+    thresh = [0.6, 0.15, 0.05]
     min_face_size = 20
     stride = 2
     slide_window = False
@@ -57,9 +59,9 @@ if __name__ == '__main__':
     vis = False
     detectors = [None, None, None]
     # prefix is the model path
-    prefix = ['../data/MTCNN_model/PNet_No_Landmark/PNet', '../data/MTCNN_model/RNet_No_Landmark/RNet',
-              '../data/MTCNN_model/ONet_No_Landmark/ONet']
-    epoch = [30, 14, 16]
+    prefix = ['../data/MTCNN_model/PNet_landmark/PNet', '../data/MTCNN_model/RNet_landmark/RNet',
+              '../data/MTCNN_model/ONet_landmark/ONet']
+    epoch = [18, 20, 20]
     batch_size = [2048, 256, 16]
     model_path = ['%s-%s' % (x, y) for x, y in zip(prefix, epoch)]
     # load pnet model

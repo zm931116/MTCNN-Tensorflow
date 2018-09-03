@@ -1,3 +1,5 @@
+
+
 import tensorflow as tf
 import numpy as np
 
@@ -8,7 +10,9 @@ class Detector(object):
     #datasize:24 or 48
     def __init__(self, net_factory, data_size, batch_size, model_path):
         graph = tf.Graph()
+
         with graph.as_default():
+
             self.image_op = tf.placeholder(tf.float32, shape=[batch_size, data_size, data_size, 3], name='input_image')
             #figure out landmark            
             self.cls_prob, self.bbox_pred, self.landmark_pred = net_factory(self.image_op, training=False)

@@ -31,10 +31,10 @@ def _get_output_filename(output_dir, name, net):
     #st = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     #return '%s/%s_%s_%s.tfrecord' % (output_dir, name, net, st)
     #return '%s/train_PNet_landmark.tfrecord' % (output_dir)
-    return '%s/neg_landmark.tfrecord' % (output_dir)
+    return '%s/%s_landmark.tfrecord' % (output_dir,name)
     
 
-def run(dataset_dir, net, output_dir, name='MTCNN', shuffling=False):
+def run(dataset_dir, net, output_dir, name='pos', shuffling=False):
     """Runs the conversion operation.
 
     Args:
@@ -59,10 +59,11 @@ def run(dataset_dir, net, output_dir, name='MTCNN', shuffling=False):
     print('lala')
     with tf.python_io.TFRecordWriter(tf_filename) as tfrecord_writer:
         for i, image_example in enumerate(dataset):
-            if( i%100 == 0):
+            if i % 100 == 99:
                 sys.stdout.write('\r>> Converting image %d/%d' % (i + 1, len(dataset)))
                 sys.stdout.flush()
             filename = image_example['filename']
+            #print(filename)
             _add_to_tfrecord(filename, image_example, tfrecord_writer)
     # Finally, write the labels file:
     # labels_to_class_names = dict(zip(range(len(_CLASS_NAMES)), _CLASS_NAMES))
@@ -70,10 +71,10 @@ def run(dataset_dir, net, output_dir, name='MTCNN', shuffling=False):
     print('\nFinished converting the MTCNN dataset!')
 
 
-def get_dataset(dir, net='PNet'):
+def get_dataset(dir, net='48'):
     #item = 'imglists/PNet/train_%s_raw.txt' % net
     #item = 'imglists/PNet/train_%s_landmark.txt' % net
-    item = '%s/neg_%s.txt' % (net,net)
+    item = '%s/%s_%s.txt' % (net,name,net)
     #print(item)
     dataset_dir = os.path.join(dir, item)
     imagelist = open(dataset_dir, 'r')
@@ -126,4 +127,5 @@ if __name__ == '__main__':
     dir = '../../DATA/'
     net = '48'
     output_directory = '../../DATA/imglists/ONet'
-    run(dir, net, output_directory, shuffling=True)
+    name = 'part'# pos neg part landmark
+    run(dir, net, output_directory, name,shuffling=True)
