@@ -414,10 +414,11 @@ class MtcnnDetector(object):
         # test_data is iter_
         s_time = time.time()
         for databatch in test_data:
+            #print('here')
             # databatch(image returned)
             batch_idx += 1
-            if batch_idx % 100 == 0:
-                c_time = (time.time() - s_time )/100
+            if batch_idx % 10 == 0:
+                c_time = (time.time() - s_time )/10
                 print("%d out of %d images done" % (batch_idx ,test_data.size))
                 print('%f seconds for each image' % c_time)
                 s_time = time.time()

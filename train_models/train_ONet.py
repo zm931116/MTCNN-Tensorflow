@@ -20,7 +20,7 @@ if __name__ == '__main__':
     base_dir = '../../DATA/imglists/ONet'
 
     model_name = 'MTCNN'
-    model_path = '../data/%s_model/ONet_landmark/ONet' % model_name
+    model_path = '../data/%s_l1Smoothed_model/ONet_landmark/ONet' % model_name
     prefix = model_path
     end_epoch = 30
     display = 10

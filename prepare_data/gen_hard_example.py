@@ -151,7 +151,7 @@ def t_net(prefix, epoch,
         print("==================================", test_mode)
         ONet = Detector(O_Net, 48, batch_size[2], model_path[2])
         detectors[2] = ONet
-        
+
     basedir = '../../DATA/'
     #anno_file
     filename = './wider_face_train_bbx_gt.txt'
@@ -193,12 +193,12 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Test mtcnn',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--test_mode', dest='test_mode', help='test net type, can be pnet, rnet or onet',
-                        default='PNet', type=str)
+                        default='RNet', type=str)
     parser.add_argument('--prefix', dest='prefix', help='prefix of model name', nargs="+",
-                        default=['../data/MTCNN_l1Smoothed_model/PNet_landmark/PNet', '../data/MTCNN_l1Smoothed_model/RNet_landmark/RNet', '../data/MTCNN_model/ONet_landmark/ONet'],
+                        default=['../data/MTCNN_model/PNet_landmark/PNet', '../data/MTCNN_model/RNet_landmark/RNet', '../data/MTCNN_model/ONet_landmark/ONet'],
                         type=str)
     parser.add_argument('--epoch', dest='epoch', help='epoch number of model to load', nargs="+",
-                        default=[20, 20, 24], type=int)
+                        default=[20, 14, 24], type=int)
     parser.add_argument('--batch_size', dest='batch_size', help='list of batch size used in prediction', nargs="+",
                         default=[2048, 256, 16], type=int)
     parser.add_argument('--thresh', dest='thresh', help='list of thresh for pnet, rnet, onet', nargs="+",
@@ -218,7 +218,7 @@ def parse_args():
 if __name__ == '__main__':
 
     #generate data for which net
-    net = 'RNet'
+    net = 'ONet'
 
     if net == "RNet":
         image_size = 24

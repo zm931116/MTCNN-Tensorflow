@@ -33,11 +33,14 @@ class Detector(object):
     #rnet and onet minibatch(test)
     def predict(self, databatch):
         # access data
+        #
         # databatch: N x 3 x data_size x data_size
+        # For Pnet N = 1
         scores = []
         batch_size = self.batch_size
 
         minibatch = []
+        #current index n ,from 0 to N-1
         cur = 0
         #num of all_data
         n = databatch.shape[0]

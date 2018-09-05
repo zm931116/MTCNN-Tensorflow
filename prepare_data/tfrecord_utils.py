@@ -178,11 +178,12 @@ def _process_image(filename, coder):
 def _process_image_withoutcoder(filename):
     #print(filename)
     image = cv2.imread(filename)
-    #cv2.imshow(filename,image)
+
     #print(image.shape)
     #print(type(image))
     # transform data into string format
     image_data = image.tostring()
+    #print(image_data)
     assert len(image.shape) == 3
     height = image.shape[0]
     width = image.shape[1]

@@ -1,4 +1,5 @@
 #coding:utf-8
+import argparse
 import os
 import random
 import sys
@@ -22,6 +23,7 @@ def _add_to_tfrecord(filename, image_example, tfrecord_writer):
     #height:original image's height
     #width:original image's width
     #image_example dict contains image's info
+
     image_data, height, width = _process_image_withoutcoder(filename)
     example = _convert_to_example_simple(image_example, image_data)
     tfrecord_writer.write(example.SerializeToString())
@@ -59,7 +61,7 @@ def run(dataset_dir, net, output_dir, name='pos', shuffling=False):
     print('lala')
     with tf.python_io.TFRecordWriter(tf_filename) as tfrecord_writer:
         for i, image_example in enumerate(dataset):
-            if i % 100 == 99:
+            if i % 100 == 0:
                 sys.stdout.write('\r>> Converting image %d/%d' % (i + 1, len(dataset)))
                 sys.stdout.flush()
             filename = image_example['filename']
@@ -122,10 +124,18 @@ def get_dataset(dir, net='48'):
 
     return dataset
 
+def parse_args():
+    parser = argparse.ArgumentParser(description='Test mtcnn',
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('--type', dest='type', help='type of images: pos, neg,landmark, part',
+                        default='landmark', type=str)
+    args = parser.parse_args()
+    return args
 
 if __name__ == '__main__':
     dir = '../../DATA/'
     net = '48'
     output_directory = '../../DATA/imglists/ONet'
-    name = 'part'# pos neg part landmark
+    args = parse_args()
+    name = args.type# pos neg part landmark
     run(dir, net, output_directory, name,shuffling=True)
