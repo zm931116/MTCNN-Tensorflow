@@ -6,11 +6,11 @@ This work is used for reproduce MTCNN,a Joint Face Detection and Alignment using
 2. You should first download [WIDER Face](http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/) and [Celeba](http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html).**WIDER Face** for face detection and **Celeba** for landmark detection(This is required by original paper.But I found some labels were wrong in Celeba. So I use [this dataset](http://mmlab.ie.cuhk.edu.hk/archive/CNN_FacePoint.htm) for landmark detection).
 
 ## Dependencies
-* Tensorflow 1.2.1
+* Tensorflow 1.10.0
 * TF-Slim
-* Python 2.7
+* Python 3.6
 * Ubuntu 16.04
-* Cuda 8.0
+* Cuda 9.0
 
 ## Prepare For Training Data
 1. Download Wider Face Training part only from Official Website , unzip to replace `WIDER_train` and put it into `prepare_data` folder.
